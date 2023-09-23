@@ -4,6 +4,8 @@ from typing import List, Type
 import pandas as pd
 from fastapi import UploadFile
 
+from config import settings
+from exceptions.core import NotFound, ColumnNotFound, UnsupportedFileType
 from models.core import CSVFile
 from repositories.core import CoreRepository
 
@@ -21,12 +23,19 @@ class CoreService:
         return dict(map(lambda value: (value[0], str(value[1])), data.items()))
 
     async def save_file(self, file: UploadFile) -> Type[CSVFile]:
-        filename = uuid.uuid4()
-        with open(f'media/csv/{filename}.csv', 'wb') as f:
-            f.write(await file.read())
-        df = pd.read_csv(f'media/csv/{filename}.csv')
+        if not self.check_content_type(file.content_type):
+            raise UnsupportedFileType
 
-        data = {'filename': filename, 'size': file.size, 'columns': df.columns._data}
+        filename = uuid.uuid4()
+        with open(f'{settings.MEDIA_CSV_PATH}{filename}.csv', 'wb') as f:
+            f.write(await file.read())
+        df = pd.read_csv(f'{settings.MEDIA_CSV_PATH}{filename}.csv')
+
+        data = {
+            'filename': filename,
+            'size': file.size,
+            'columns': list(df.columns),
+        }
 
         json_data = self.to_json(data)
         file = await self.repo.save(json_data)
@@ -38,4 +47,23 @@ class CoreService:
 
     async def get_file(self, file_id: int) -> Type[CSVFile]:
         file = await self.repo.get_by_id(file_id)
+        if not file:
+            raise NotFound
         return file
+
+    async def get_file_data(
+        self,
+        filename: str,
+        filters: dict,
+    ):
+        df = pd.read_csv(f'{settings.MEDIA_CSV_PATH}{filename}.csv')
+
+        sort_by = filters.get('sort_by')
+        if sort_by:
+            try:
+                df = df.sort_values(sort_by, ascending=filters['ascending'])
+            except KeyError:
+                raise ColumnNotFound
+
+        data = [(dict(zip(df.columns.values, row))) for row in df.values]
+        return data

@@ -22,6 +22,6 @@ class CoreRepository:
         return result.scalars().all()
 
     async def get_by_id(self, file_id: int) -> Type[CSVFile]:
-        query = select(CSVFile).where(CSVFile.id.is_(file_id))
+        query = select(CSVFile).where(CSVFile.id == file_id)
         result = await self.session.execute(query)
         return result.scalar()

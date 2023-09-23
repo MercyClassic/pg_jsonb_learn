@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     POSTGRES_PASSWORD: str
     POSTGRES_HOST: str
     POSTGRES_DB: str
+    MEDIA_CSV_PATH: str = 'media/csv/'
 
 
 settings = Settings()
