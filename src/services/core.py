@@ -5,7 +5,7 @@ import pandas as pd
 from fastapi import UploadFile
 
 from config import settings
-from exceptions.core import NotFound, ColumnNotFound, UnsupportedFileType
+from exceptions.core import ColumnNotFound, NotFound, UnsupportedFileType
 from models.core import CSVFile
 from repositories.core import CoreRepository
 
@@ -66,4 +66,12 @@ class CoreService:
                 raise ColumnNotFound
 
         data = [(dict(zip(df.columns.values, row))) for row in df.values]
+        return data
+
+    async def is_column_exists(
+        self,
+        file_id: int,
+        column: str,
+    ) -> bool:
+        data = await self.repo.is_has_column(file_id, column)
         return data
