@@ -26,6 +26,9 @@ pydantic-settings = "^2.0.3"
 python-multipart = "^0.0.6"
 pandas = "^2.1.0"
 gunicorn = "^21.2.0"
+pytest = "^7.4.2"
+httpx = "^0.25.0"
+pytest-asyncio = "^0.21.1"
 
 [tool.poetry.group.dev.dependencies]
 psycopg2 = "^2.9.7"

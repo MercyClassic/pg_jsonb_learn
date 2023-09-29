@@ -15,7 +15,7 @@ router = APIRouter(tags=['core'], prefix='/api/v1')
 
 
 @router.post('/')
-async def send_file(
+async def post_file(
     file: UploadFile,
     core_service: CoreService = Depends(get_core_service),
 ):

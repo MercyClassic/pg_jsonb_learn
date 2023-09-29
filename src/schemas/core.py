@@ -1,7 +1,7 @@
-from typing import List, Dict, Annotated
+from typing import Annotated, Dict, List
 
 from fastapi import Query
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, ConfigDict, field_validator
 
 
 class PrepareInfoValidator:
@@ -16,21 +16,18 @@ class PrepareInfoValidator:
         return value
 
 
-class CSVFileSchemaList(BaseModel, PrepareInfoValidator):
+class CSVFileBaseSchema(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
     id: int
     info: dict
 
-    class Config:
-        from_attributes = True
+
+class CSVFileSchemaList(CSVFileBaseSchema, PrepareInfoValidator):
+    pass
 
 
-class CSVFileSchemaDetail(BaseModel, PrepareInfoValidator):
-    id: int
-    info: dict
+class CSVFileSchemaDetail(CSVFileBaseSchema, PrepareInfoValidator):
     rows: List[Dict]
-
-    class Config:
-        from_attributes = True
 
 
 class FilterCSVFile(BaseModel):
