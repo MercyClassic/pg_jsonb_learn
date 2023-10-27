@@ -1,5 +1,5 @@
 import uuid
-from typing import List, Type
+from typing import List
 
 import pandas as pd
 from fastapi import UploadFile
@@ -22,7 +22,7 @@ class CoreService:
     def to_json(data: dict):
         return dict(map(lambda value: (value[0], str(value[1])), data.items()))
 
-    async def save_file(self, file: UploadFile) -> Type[CSVFile]:
+    async def save_file(self, file: UploadFile) -> CSVFile:
         if not self.check_content_type(file.content_type):
             raise UnsupportedFileType
 
@@ -41,11 +41,11 @@ class CoreService:
         file = await self.repo.save(json_data)
         return file
 
-    async def get_files(self) -> List[Type[CSVFile]]:
+    async def get_files(self) -> List[CSVFile]:
         files = await self.repo.get_all()
         return files
 
-    async def get_file(self, file_id: int) -> Type[CSVFile]:
+    async def get_file(self, file_id: int) -> CSVFile:
         file = await self.repo.get_by_id(file_id)
         if not file:
             raise NotFound
