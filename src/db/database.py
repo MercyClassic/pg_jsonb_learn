@@ -18,6 +18,10 @@ class Base(DeclarativeBase):
     pass
 
 
+async def get_session_stub() -> AsyncGenerator[AsyncSession, None]:
+    raise NotImplementedError
+
+
 async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
     async with async_session_maker() as session:
         yield session

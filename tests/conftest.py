@@ -8,7 +8,7 @@ from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.pool import NullPool
 
-from db.database import Base, get_async_session
+from db.database import Base, get_session_stub
 from main import app
 
 load_dotenv()
@@ -33,7 +33,7 @@ async def override_get_async_session() -> AsyncGenerator[AsyncSession, None]:
         yield session
 
 
-app.dependency_overrides[get_async_session] = override_get_async_session
+app.dependency_overrides[get_session_stub] = override_get_async_session
 
 
 @pytest.fixture(autouse=True, scope='module')

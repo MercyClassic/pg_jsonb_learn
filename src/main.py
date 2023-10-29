@@ -6,6 +6,7 @@ from starlette import status
 from starlette.responses import JSONResponse
 
 from config import LOGGING_CONFIG
+from db.database import get_async_session, get_session_stub
 from routers.core import router as core_router
 
 config.dictConfig(LOGGING_CONFIG)
@@ -13,6 +14,8 @@ logger = logging.getLogger(__name__)
 
 
 app = FastAPI(title='postgresql_json_learn')
+
+app.dependency_overrides[get_session_stub] = get_async_session
 
 
 @app.exception_handler(Exception)
