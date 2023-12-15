@@ -4,15 +4,15 @@ from typing import List
 import pandas as pd
 from fastapi import UploadFile
 
-from config import settings
 from exceptions.core import ColumnNotFound, NotFound, UnsupportedFileType
 from models.core import CSVFile
 from repositories.core import CoreRepository
 
 
 class CoreService:
-    def __init__(self, repo: CoreRepository):
+    def __init__(self, repo: CoreRepository, media_dir: str):
         self.repo = repo
+        self.media_dir = media_dir
 
     @staticmethod
     def check_content_type(content_type: str) -> bool:
@@ -27,9 +27,9 @@ class CoreService:
             raise UnsupportedFileType
 
         filename = uuid.uuid4()
-        with open(f'{settings.MEDIA_CSV_PATH}{filename}.csv', 'wb') as f:
+        with open(f'{self.media_dir}/{filename}.csv', 'wb') as f:
             f.write(await file.read())
-        df = pd.read_csv(f'{settings.MEDIA_CSV_PATH}{filename}.csv')
+        df = pd.read_csv(f'{self.media_dir}/{filename}.csv')
 
         data = {
             'filename': filename,
@@ -56,7 +56,7 @@ class CoreService:
         filename: str,
         filters: dict,
     ):
-        df = pd.read_csv(f'{settings.MEDIA_CSV_PATH}{filename}.csv')
+        df = pd.read_csv(f'{self.media_dir}/{filename}.csv')
 
         sort_by = filters.get('sort_by')
         if sort_by:

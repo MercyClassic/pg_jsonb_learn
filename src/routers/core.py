@@ -14,10 +14,10 @@ from services.core import CoreService
 router = APIRouter(tags=['core'], prefix='/api/v1')
 
 
-@router.post('/')
+@router.post('/files')
 async def post_file(
     file: UploadFile,
-    core_service: CoreService = Depends(get_core_service),
+    core_service: Annotated[CoreService, Depends(get_core_service)],
 ):
     file = await core_service.save_file(file)
     data = TypeAdapter(CSVFileSchemaList).validate_python(file)
@@ -27,8 +27,10 @@ async def post_file(
     )
 
 
-@router.get('/')
-async def get_file_list(core_service: CoreService = Depends(get_core_service)):
+@router.get('/files')
+async def get_file_list(
+    core_service: Annotated[CoreService, Depends(get_core_service)],
+):
     files = await core_service.get_files()
     data = TypeAdapter(List[CSVFileSchemaList]).validate_python(files)
     return JSONResponse(
@@ -37,11 +39,11 @@ async def get_file_list(core_service: CoreService = Depends(get_core_service)):
     )
 
 
-@router.get('/{file_id}')
+@router.get('/files/{file_id}')
 async def get_file_detail(
     file_id: int,
-    filters: FilterCSVFile = Depends(),
-    core_service: CoreService = Depends(get_core_service),
+    filters: Annotated[FilterCSVFile, Depends()],
+    core_service: Annotated[CoreService, Depends(get_core_service)],
 ):
     file = await core_service.get_file(file_id)
 
@@ -58,11 +60,14 @@ async def get_file_detail(
     )
 
 
-@router.post('/{file_id}/has_column')
+@router.post('/files/{file_id}/has_column')
 async def column_exists(
     file_id: int,
     column: Annotated[str, Body()],
-    core_service: CoreService = Depends(get_core_service),
+    core_service: Annotated[CoreService, Depends(get_core_service)],
 ):
     has_column = await core_service.is_column_exists(file_id, column)
-    return JSONResponse(status_code=status.HTTP_200_OK, content={'result': has_column})
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={'result': has_column},
+    )

@@ -1,30 +1,26 @@
 import asyncio
-import os
 from typing import AsyncGenerator
 
 import pytest
-from dotenv import load_dotenv
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.pool import NullPool
 
+from config import get_config
 from db.database import Base, get_session_stub
 from main import app
 
-load_dotenv()
+app_config = get_config()
 
-POSTGRES_USER_TEST = os.getenv('POSTGRES_USER_TEST')
-POSTGRES_PASSWORD_TEST = os.getenv('POSTGRES_PASSWORD_TEST')
-POSTGRES_HOST_TEST = os.getenv('POSTGRES_HOST_TEST')
-POSTGRES_DB_TEST = os.getenv('POSTGRES_DB_TEST')
-
-DATABASE_URL_TEST = (
-    f'postgresql+asyncpg://{POSTGRES_USER_TEST}:{POSTGRES_PASSWORD_TEST}@'
-    f'{POSTGRES_HOST_TEST}:5432/{POSTGRES_DB_TEST}'
+engine_test = create_async_engine(
+    app_config.test_db_uri,
+    poolclass=NullPool,
 )
-
-engine_test = create_async_engine(DATABASE_URL_TEST, poolclass=NullPool)
-async_session_maker = async_sessionmaker(engine_test, class_=AsyncSession, expire_on_commit=False)
+async_session_maker = async_sessionmaker(
+    engine_test,
+    class_=AsyncSession,
+    expire_on_commit=False,
+)
 Base.metadata.bind = engine_test
 
 
