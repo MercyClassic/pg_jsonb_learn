@@ -3,4 +3,4 @@
 __pycache__
 media
 logs
-pytest_cache
+.pytest_cache

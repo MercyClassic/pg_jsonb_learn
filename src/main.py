@@ -1,23 +1,30 @@
 import logging
+import os
 from logging import config
+from pathlib import Path
 
 from fastapi import FastAPI
 from starlette import status
 from starlette.responses import JSONResponse
 
-from config import get_config, get_logging_dict
-from db.database import get_async_session, get_session_stub
+from config import get_logging_dict
+from dependencies.di.init_dependencies import init_dependencies
 from routers.core import router as core_router
 
-app_config = get_config()
+root_dir = '%s' % Path(__file__).parent
 
-config.dictConfig(get_logging_dict(app_config.ROOT_DIR))
+config.dictConfig(get_logging_dict(root_dir))
 logger = logging.getLogger(__name__)
 
 
-app = FastAPI(title='postgresql_json_learn')
+def create_app() -> FastAPI:
+    app = FastAPI(title='postgresql_json_learn')
+    init_dependencies(app, os.environ['db_uri'])
+    app.include_router(core_router)
+    return app
 
-app.dependency_overrides[get_session_stub] = get_async_session
+
+app = create_app()
 
 
 @app.exception_handler(Exception)
@@ -27,6 +34,3 @@ async def unexpected_error_log(request, ex):
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content=None,
     )
-
-
-app.include_router(core_router)
